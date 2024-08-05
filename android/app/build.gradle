@@ -1,0 +1,123 @@
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+if (flutterRoot == null) {
+    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+
+//todo uncomment when firebase is configured
+//apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.firebase.crashlytics'
+
+android {
+    compileSdkVersion 33
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "mk.webfactory.flutter_template"
+        minSdkVersion 28
+        targetSdkVersion 33
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+
+        // TODO: Set to true to use flutter engine caching for Android
+        buildConfigField 'boolean', 'USE_CACHED_FLUTTER_ENGINE', 'false'
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    flavorDimensions 'default'
+
+    productFlavors {
+        mock {
+            dimension 'default'
+            applicationIdSuffix ".mock"
+            versionNameSuffix "-mock"
+            flutter {
+                target 'lib/main_mock.dart'
+            }
+            resValue "string", "app_name", "FlutterTemplate Mock" //todo set app name
+        }
+        dev {
+            dimension 'default'
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+            flutter {
+                target 'lib/main_dev.dart'
+            }
+            resValue "string", "app_name", "FlutterTemplate Dev" //todo set app name
+        }
+        staging {
+            dimension 'default'
+            applicationIdSuffix ".stg"
+            versionNameSuffix "-stg"
+            flutter {
+                target 'lib/main_staging.dart'
+            }
+            resValue "string", "app_name", "FlutterTemplate Staging" //todo set app name
+        }
+        production {
+            dimension 'default'
+            flutter {
+                target 'lib/main_production.dart'
+            }
+            resValue "string", "app_name", "FlutterTemplate" //todo set app name
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.google.code.gson:gson:2.9.1'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.skyscreamer:jsonassert:1.5.0'
+    testImplementation 'org.mockito:mockito-core:4.8.0'
+}
